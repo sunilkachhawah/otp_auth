@@ -1,10 +1,11 @@
+import pymongo
 from pymongo import MongoClient, ASCENDING, IndexModel
 # Set up MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://root:root@cluster0.oni3uns.mongodb.net/")
 db = client["temp_otp_data"]
 collection = db["dumpdata"]
-
-ttl_index = IndexModel([("created_at", ASCENDING)], expireAfterSeconds=100)
-# Create the TTL index on the collection
+# Create a TTL index for automatic deletion after 5 minutes
+ttl_index = IndexModel([("time", ASCENDING)], expireAfterSeconds=300)
 collection.create_indexes([ttl_index])
+
 

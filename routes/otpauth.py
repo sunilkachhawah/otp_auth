@@ -1,17 +1,17 @@
 import random, string
-from datetime import datetime
+
 import pytz
 
 from fastapi import APIRouter, HTTPException
 
 import configuration.aws_sns
 import models.mobile_number
-from datetime import datetime
+from datetime import datetime, timedelta
 from configuration.mongoDb import collection
 
 otp = APIRouter()
 
-indian_timezone = pytz.timezone('Asia/Kolkata')
+
 @otp.post("/login")
 async def send_otp(send_otp_request: models.mobile_number.SendOTPRequest):
     try:
@@ -30,14 +30,14 @@ async def send_otp(send_otp_request: models.mobile_number.SendOTPRequest):
             PhoneNumber=phone_number,
             Message=message,
         )
-        # store otp,device id in data for 5 minuite
-        current_time = datetime.now(indian_timezone)
-        # document for store this data
+        current_time = datetime.now()
+        expiration_time = current_time + timedelta(minutes=5)
+
         otp_data = {
             "phone_number": send_otp_request.phone_number,
             "device_id": send_otp_request.device_id,
             "otp": otp,
-            "time": current_time
+            "time": expiration_time
         }
 
         collection.insert_one(otp_data)
