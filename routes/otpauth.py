@@ -1,6 +1,6 @@
 import random, string
 
-import pytz
+
 
 from fastapi import APIRouter, HTTPException
 
@@ -30,14 +30,13 @@ async def send_otp(send_otp_request: models.mobile_number.SendOTPRequest):
             PhoneNumber=phone_number,
             Message=message,
         )
-        current_time = datetime.now()
-        expiration_time = current_time + timedelta(minutes=5)
+
 
         otp_data = {
             "phone_number": send_otp_request.phone_number,
             "device_id": send_otp_request.device_id,
             "otp": otp,
-            "time": expiration_time
+            "expireAt": datetime.utcnow() + timedelta(minutes=5)
         }
 
         collection.insert_one(otp_data)
