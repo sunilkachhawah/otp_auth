@@ -1,10 +1,7 @@
 from fastapi import FastAPI
 
-
-from routes.otpauth import otp
+from routes import otpauth
 
 app = FastAPI()
 
-app.include_router(otp)
-
-
+app.include_router(otpauth.otp)
