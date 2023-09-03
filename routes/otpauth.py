@@ -1,19 +1,16 @@
 import random, string
 
-
-
 from fastapi import APIRouter, HTTPException
 
-import configuration.aws_sns
-import models.mobile_number
+from configuration import aws_sns, mongoDb
+from models import mobile_number
 from datetime import datetime, timedelta
-from configuration.mongoDb import collection
 
 otp = APIRouter()
 
 
 @otp.post("/login")
-async def send_otp(send_otp_request: models.mobile_number.SendOTPRequest):
+async def send_otp(param: mobile_number.SendOTPRequest):
     try:
         def generate_otp(length=6):
             digits = string.digits
@@ -24,22 +21,20 @@ async def send_otp(send_otp_request: models.mobile_number.SendOTPRequest):
 
         message = f"login OTP for MYeKIGAI is: {otp}"
 
-        phone_number = send_otp_request.phone_number  # Get the phone number from the POST request
+        phone_number = param.phone_number  # Get the phone number from the POST request
         # for deliver message through SNS
-        configuration.aws_sns.sns_client.publish(
+        aws_sns.sns_client.publish(
             PhoneNumber=phone_number,
             Message=message,
         )
 
-
         otp_data = {
-            "phone_number": send_otp_request.phone_number,
-            "device_id": send_otp_request.device_id,
+            "device_id": param.device_id,
             "otp": otp,
             "expireAt": datetime.utcnow() + timedelta(minutes=5)
         }
 
-        collection.insert_one(otp_data)
+        mongoDb.collection.insert_one(otp_data)
         return {"message": "OTP sent successfully"}
     except Exception as e:
         print("Error:", e)
@@ -47,12 +42,12 @@ async def send_otp(send_otp_request: models.mobile_number.SendOTPRequest):
 
 
 @otp.post("/verify")
-async def verify_otp(verify_otp_request: models.mobile_number.VerifyOTPRequest):
+async def verify_otp(param: mobile_number.VerifyOTPRequest):
     check = {
-        "device_id": verify_otp_request.device_id,
-        "otp": verify_otp_request.otp
+        "device_id": param.device_id,
+        "otp": param.otp
     }
-    existdata=collection.find_one(check)
+    existdata = mongoDb.collection.find_one(check)
     if existdata:
         return {"message": "OTP verification successful"}
     else:
