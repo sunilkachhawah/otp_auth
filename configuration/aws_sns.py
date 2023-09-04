@@ -1,7 +1,7 @@
 import boto3
 
-aws_access_key_id: str = "AKIA3KELJ4PJC4S2QKOS"
-aws_secret_access_key: str = "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"
+aws_access_key_id: str = "aws_access"
+aws_secret_access_key: str = "secret_key"
 region_name: str = "ap-south-1"
 sns_client = boto3.client(
     "sns",
