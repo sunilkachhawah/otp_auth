@@ -49,6 +49,7 @@ async def verify_otp(param: mobile_number.VerifyOTPRequest):
     }
     existdata = mongoDb.collection.find_one(check)
     if existdata:
+        mongoDb.collection.delete_one(check)
         return {"message": "OTP verification successful"}
     else:
         raise HTTPException(status_code=400, detail="OTP verification failed")
